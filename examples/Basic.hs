@@ -11,7 +11,7 @@ import Data.Time.Clock.POSIX (getPOSIXTime)
 import qualified System.Metrics.Distribution as Distribution
 import qualified System.Metrics.Counter as Counter
 import qualified System.Metrics.Label as Label
-import System.Remote.Monitoring
+import System.Remote.Monitoring.Wai
 
 -- 'sum' is using a non-strict lazy fold and will blow the stack.
 sum' :: Num a => [a] -> a

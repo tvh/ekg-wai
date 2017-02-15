@@ -9,7 +9,7 @@ application.
 Adding monitoring to your application is simple.  Just launch the
 monitoring server as soon as your application starts
 
-    import System.Remote.Monitoring
+    import System.Remote.Monitoring.Wai
     
     main = do
          forkServer "localhost" 8000
@@ -47,12 +47,12 @@ applications.
 Please report bugs via the
 [GitHub issue tracker](https://github.com/tibbe/ekg/issues).
 
-Master [git repository](https://github.com/tibbe/ekg):
+Master [git repository](https://github.com/tvh/ekg-wai):
 
-    git clone https://github.com/tibbe/ekg.git
+    git clone https://github.com/tvh/ekg-wai.git
 
 
 # Authors
 
-This library is written and maintained by Johan Tibell,
-<johan.tibell@gmail.com>.
+This library is maintained by Timo von Holtz, <tvh@tvholtz.de>.
+It was originally written using Snap by Johan Tibell, <johan.tibell@gmail.com>.

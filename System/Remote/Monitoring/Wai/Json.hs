@@ -1,10 +1,10 @@
-module System.Remote.Json
+module System.Remote.Monitoring.Wai.Json
     (
       encodeAll
     , encodeOne
     ) where
 
-import qualified Data.Aeson.Encode as A
+import qualified Data.Aeson as A
 import qualified Data.ByteString.Lazy as L
 
 import System.Metrics

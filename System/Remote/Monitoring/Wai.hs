@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP, OverloadedStrings #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 -- | This module provides remote monitoring of a running process over
 -- HTTP.  It can be used to run an HTTP server that provides both a
@@ -17,7 +17,7 @@
 -- command line tool (e.g. curl)
 --
 -- > $ curl -H "Accept: application/json" http://localhost:8000/
-module System.Remote.Monitoring
+module System.Remote.Monitoring.Wai
     (
       -- * Required configuration
       -- $configuration
@@ -44,26 +44,21 @@ module System.Remote.Monitoring
     ) where
 
 import Control.Concurrent (ThreadId, myThreadId, throwTo)
-import qualified Data.ByteString as S
 import Data.Int (Int64)
-import qualified Data.Text as T
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Prelude hiding (read)
+import qualified Data.ByteString as BS
+import qualified Data.Text as T
 
 import qualified System.Metrics as Metrics
 import qualified System.Metrics.Counter as Counter
 import qualified System.Metrics.Distribution as Distribution
 import qualified System.Metrics.Gauge as Gauge
 import qualified System.Metrics.Label as Label
-import System.Remote.Snap
+import System.Remote.Monitoring.Wai.App
 import Network.Socket (withSocketsDo)
 
-#if __GLASGOW_HASKELL__ >= 706
 import Control.Concurrent (forkFinally)
-#else
-import Control.Concurrent (forkIO)
-import Control.Exception (SomeException, mask, try)
-#endif
 
 -- $configuration
 --
@@ -171,7 +166,7 @@ import Control.Exception (SomeException, mask, try)
 -- >     loop
 --
 -- To create a gauge, use 'getGauge' instead of 'getCounter' and then
--- call e.g. 'System.Remote.Gauge.set'. Similar for the other metric
+-- call e.g. 'System.Metrics.Gauge.set'. Similar for the other metric
 -- types.
 --
 -- It's also possible to register metrics directly using the
@@ -198,8 +193,8 @@ data Server = Server {
 -- | Like 'forkServerWith', but creates a default metric store with
 -- some predefined metrics. The predefined metrics are those given in
 -- 'System.Metrics.registerGcMetrics'.
-forkServer :: S.ByteString  -- ^ Host to listen on (e.g. \"localhost\")
-           -> Int           -- ^ Port to listen on (e.g. 8000)
+forkServer :: BS.ByteString -- ^ Host to listen on (e.g. \"localhost\")
+           -> Int -- ^ Port to listen on (e.g. 8000)
            -> IO Server
 forkServer host port = do
     store <- Metrics.newStore
@@ -225,9 +220,9 @@ forkServer host port = do
 -- store isn't created by you and the creator doesn't register the
 -- metrics registered by 'forkServer', you might want to register them
 -- yourself.
-forkServerWith :: Metrics.Store  -- ^ Metric store
-               -> S.ByteString   -- ^ Host to listen on (e.g. \"localhost\")
-               -> Int            -- ^ Port to listen on (e.g. 8000)
+forkServerWith :: Metrics.Store -- ^ Metric store
+               -> BS.ByteString -- ^ Host to listen on (e.g. \"localhost\")
+               -> Int -- ^ Port to listen on (e.g. 8000)
                -> IO Server
 forkServerWith store host port = do
     Metrics.registerCounter "ekg.server_timestamp_ms" getTimeMs store
@@ -276,13 +271,3 @@ getDistribution :: T.Text  -- ^ Distribution name
                 -> IO Distribution.Distribution
 getDistribution name server =
     Metrics.createDistribution name (serverMetricStore server)
-
-------------------------------------------------------------------------
--- Backwards compatibility shims
-
-#if __GLASGOW_HASKELL__ < 706
-forkFinally :: IO a -> (Either SomeException a -> IO ()) -> IO ThreadId
-forkFinally action and_then =
-  mask $ \restore ->
-    forkIO $ try (restore action) >>= and_then
-#endif

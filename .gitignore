@@ -1,3 +1,4 @@
+*~
 *.hi
 *.o
 *.p_hi
@@ -7,6 +8,8 @@
 .cabal-sandbox/
 .hpc/
 /dist/*
+.stack-work
+stack.yaml
 cabal.config
 cabal.sandbox.config
 examples/Basic
