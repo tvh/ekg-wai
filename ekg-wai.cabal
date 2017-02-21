@@ -5,6 +5,8 @@ description:
   This library lets you remotely monitor a running process over HTTP.
   It provides a simple way to integrate a monitoring server into any
   application.
+
+  This is a port of the ekg library to depend on wai instead of snap.
 homepage:            https://github.com/tvh/ekg-wai
 bug-reports:         https://github.com/tvh/ekg-wai/issues
 license:             BSD3
