@@ -1,5 +1,6 @@
 name:                ekg-wai
 version:             0.1.0.0
+version:             0.1.0.1
 synopsis:            Remote monitoring of processes
 description:
   This library lets you remotely monitor a running process over HTTP.
@@ -36,7 +37,7 @@ library
     System.Remote.Monitoring.Wai.App
 
   build-depends:
-    aeson < 1.2,
+    aeson,
     base >= 4.5 && < 4.10,
     bytestring < 1.0,
     ekg-core >= 0.1 && < 0.2,
