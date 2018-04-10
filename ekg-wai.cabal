@@ -24,7 +24,10 @@ extra-source-files:  LICENSE.icons LICENSE.javascript README.md
                      assets/bootstrap-1.4.0.css
                      examples/Basic.hs CHANGES.md
 cabal-version:       >= 1.8
-tested-with:         GHC == 8.0.2
+tested-with:         GHC == 7.10.3
+                   , GHC == 8.0.2
+                   , GHC == 8.2.2
+                   , GHC == 8.4.1
 
 library
   exposed-modules:
@@ -37,7 +40,7 @@ library
 
   build-depends:
     aeson,
-    base >= 4.5 && < 4.11,
+    base >= 4.8 && < 4.12,
     bytestring < 1.0,
     ekg-core >= 0.1 && < 0.2,
     ekg-json >= 0.1 && < 0.2,
