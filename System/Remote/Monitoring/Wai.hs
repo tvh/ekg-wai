@@ -34,6 +34,7 @@ module System.Remote.Monitoring.Wai
     , serverMetricStore
     , forkServer
     , forkServerWith
+    , monitor
 
       -- * Defining metrics
       -- $userdefined
