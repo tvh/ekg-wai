@@ -45,7 +45,7 @@ getNumericHostAddress host = do
     unsupportedAddressError = throwIO $
         userError $ "unsupported address: " ++ BS8.unpack host
 
-startServer :: Store
+startServer :: Store metrics
             -> BS.ByteString -- ^ Host to listen on (e.g. \"localhost\")
             -> Int -- ^ Port to listen on (e.g. 8000)
             -> IO ()
@@ -58,7 +58,7 @@ startServer store host port = do
     runSettings conf (monitor store)
 
 -- | A handler that can be installed into an existing Snap application.
-monitor :: Store -> Application
+monitor :: Store metrics -> Application
 monitor store req respond = do
     dataDir <- liftIO getDataDir
     let acceptHdr = (List.head . parseHttpAccept) <$> acceptHeader req
@@ -74,7 +74,7 @@ acceptHeader req = lookup "Accept" $ requestHeaders req
 
 -- | Serve all counter, gauges and labels, built-in or not, as a
 -- nested JSON object.
-serve :: Store -> Application
+serve :: Store metrics -> Application
 serve store req respond = do
     response <-
         case pathInfo req of
@@ -91,9 +91,12 @@ serve store req respond = do
     serveOne segments = do
         let name = T.intercalate "." segments
         metrics <- liftIO $ sampleAll store
-        case M.lookup name metrics of
-            Nothing -> return $ responseLBS status404 respHeaders "\"Metric not found\""
-            Just metric -> return $ responseLBS status200 respHeaders $ encodeOne metric
+        let metrics' = M.filterWithKey (\k _v -> idName k == name) metrics
+        return $
+          if null metrics' then
+            responseLBS status404 respHeaders "\"Metric not found\""
+          else
+            responseLBS status200 respHeaders $ encodeAll metrics'
 
 ------------------------------------------------------------------------
 -- Utilities for working with accept headers

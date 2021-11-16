@@ -1,4 +1,6 @@
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE TypeApplications #-}
 
 -- | This module provides remote monitoring of a running process over
 -- HTTP.  It can be used to run an HTTP server that provides both a
@@ -34,13 +36,6 @@ module System.Remote.Monitoring.Wai
     , serverMetricStore
     , forkServer
     , forkServerWith
-
-      -- * Defining metrics
-      -- $userdefined
-    , getCounter
-    , getGauge
-    , getLabel
-    , getDistribution
     ) where
 
 import Control.Concurrent (ThreadId, myThreadId, throwTo)
@@ -48,13 +43,8 @@ import Data.Int (Int64)
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Prelude hiding (read)
 import qualified Data.ByteString as BS
-import qualified Data.Text as T
 
 import qualified System.Metrics as Metrics
-import qualified System.Metrics.Counter as Counter
-import qualified System.Metrics.Distribution as Distribution
-import qualified System.Metrics.Gauge as Gauge
-import qualified System.Metrics.Label as Label
 import System.Remote.Monitoring.Wai.App
 import Network.Socket (withSocketsDo)
 
@@ -137,42 +127,6 @@ import Control.Concurrent (forkFinally)
 -- >   }
 -- > }
 
--- $userdefined
--- The monitoring server can store and serve integer-valued counters
--- and gauges, string-valued labels, and statistical distributions. A
--- counter is a monotonically increasing value (e.g. TCP connections
--- established since program start.) A gauge is a variable value (e.g.
--- the current number of concurrent connections.) A label is a
--- free-form string value (e.g. exporting the command line arguments
--- or host name.) A distribution is a statistic summary of events
--- (e.g. processing time per request.) Each metric is associated with
--- a name, which is used when it is displayed in the UI or returned in
--- a JSON object.
---
--- Metrics share the same namespace so it's not possible to create
--- e.g. a counter and a gauge with the same. Attempting to do so will
--- result in an 'error'.
---
--- To create and use a counter, simply call 'getCounter' to create it
--- and then call e.g. 'Counter.inc' or 'Counter.add' to modify its
--- value. Example:
---
--- > main = do
--- >     handle <- forkServer "localhost" 8000
--- >     counter <- getCounter "iterations" handle
--- >     let loop n = do
--- >             inc counter
--- >             loop
--- >     loop
---
--- To create a gauge, use 'getGauge' instead of 'getCounter' and then
--- call e.g. 'System.Metrics.Gauge.set'. Similar for the other metric
--- types.
---
--- It's also possible to register metrics directly using the
--- @System.Metrics@ module in the ekg-core package. This gives you a
--- bit more control over how metric values are retrieved.
-
 ------------------------------------------------------------------------
 -- * The monitoring server
 
@@ -187,7 +141,7 @@ data Server = Server {
       -- | The metric store associated with the server. If you want to
       -- add metric to the default store created by 'forkServer' you
       -- need to use this function to retrieve it.
-    , serverMetricStore :: {-# UNPACK #-} !Metrics.Store
+    , serverMetricStore :: {-# UNPACK #-} !(Metrics.Store Metrics.AllMetrics)
     }
 
 -- | Like 'forkServerWith', but creates a default metric store with
@@ -198,7 +152,9 @@ forkServer :: BS.ByteString -- ^ Host to listen on (e.g. \"localhost\")
            -> IO Server
 forkServer host port = do
     store <- Metrics.newStore
-    Metrics.registerGcMetrics store
+    _ <- Metrics.register
+          (Metrics.subset Metrics.ofAll store)
+          Metrics.registerGcMetrics
     forkServerWith store host port
 
 -- | Start an HTTP server in a new thread.  The server replies to GET
@@ -220,12 +176,14 @@ forkServer host port = do
 -- store isn't created by you and the creator doesn't register the
 -- metrics registered by 'forkServer', you might want to register them
 -- yourself.
-forkServerWith :: Metrics.Store -- ^ Metric store
+forkServerWith :: Metrics.Store Metrics.AllMetrics -- ^ Metric store
                -> BS.ByteString -- ^ Host to listen on (e.g. \"localhost\")
                -> Int -- ^ Port to listen on (e.g. 8000)
                -> IO Server
 forkServerWith store host port = do
-    Metrics.registerCounter "ekg.server_timestamp_ms" getTimeMs store
+    _ <- Metrics.register store $
+          Metrics.registerCounter
+            (Metrics.Metric @"ekg.server_timestamp_ms") () getTimeMs
     me <- myThreadId
     tid <- withSocketsDo $ forkFinally (startServer store host port) $ \ r ->
         case r of
@@ -235,39 +193,3 @@ forkServerWith store host port = do
   where
     getTimeMs :: IO Int64
     getTimeMs = (round . (* 1000)) `fmap` getPOSIXTime
-
-------------------------------------------------------------------------
--- * Defining metrics
-
--- | Return a new, zero-initialized counter associated with the given
--- name and server. Multiple calls to 'getCounter' with the same
--- arguments will result in an 'error'.
-getCounter :: T.Text  -- ^ Counter name
-           -> Server  -- ^ Server that will serve the counter
-           -> IO Counter.Counter
-getCounter name server = Metrics.createCounter name (serverMetricStore server)
-
--- | Return a new, zero-initialized gauge associated with the given
--- name and server. Multiple calls to 'getGauge' with the same
--- arguments will result in an 'error'.
-getGauge :: T.Text  -- ^ Gauge name
-         -> Server  -- ^ Server that will serve the gauge
-         -> IO Gauge.Gauge
-getGauge name server = Metrics.createGauge name (serverMetricStore server)
-
--- | Return a new, empty label associated with the given name and
--- server. Multiple calls to 'getLabel' with the same arguments will
--- result in an 'error'.
-getLabel :: T.Text  -- ^ Label name
-         -> Server  -- ^ Server that will serve the label
-         -> IO Label.Label
-getLabel name server = Metrics.createLabel name (serverMetricStore server)
-
--- | Return a new distribution associated with the given name and
--- server. Multiple calls to 'getDistribution' with the same arguments
--- will result in an 'error'.
-getDistribution :: T.Text  -- ^ Distribution name
-                -> Server  -- ^ Server that will serve the distribution
-                -> IO Distribution.Distribution
-getDistribution name server =
-    Metrics.createDistribution name (serverMetricStore server)

@@ -1,0 +1,9 @@
+source-repository-package
+  type: git
+  location: https://github.com/hasura/ekg-core.git
+  tag: ac51c3834e242833e9735394295cbcaa583233f8
+
+source-repository-package
+  type: git
+  location: https://github.com/hasura/ekg-json.git
+  tag: c8f9f3dfe27ae394148c168ac607be7d9de124dd
