@@ -1,5 +1,5 @@
 name:                ekg-wai
-version:             0.1.0.3
+version:             0.1.1.0
 synopsis:            Remote monitoring of processes
 description:
   This library lets you remotely monitor a running process over HTTP.
@@ -22,8 +22,8 @@ data-files:          assets/index.html assets/monitor.js assets/monitor.css
 extra-source-files:  LICENSE.icons LICENSE.javascript README.md
                      assets/jquery-1.6.4.js assets/jquery.flot.js
                      assets/bootstrap-1.4.0.css
-                     examples/Basic.hs CHANGES.md
-cabal-version:       >= 1.8
+                     examples/Basic.hs
+cabal-version:       >= 1.10
 tested-with:         GHC == 7.10.3
                    , GHC == 8.0.2
                    , GHC == 8.2.2
@@ -57,6 +57,7 @@ library
     warp
 
   ghc-options: -Wall
+  default-language:    Haskell98
 
 source-repository head
   type:     git
