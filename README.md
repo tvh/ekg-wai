@@ -1,4 +1,5 @@
 # EKG: Remote monitoring of running processes over HTTP
+[![Build status](https://github.com/tvh/ekg-wai/actions/workflows/ci.yml/badge.svg)](https://github.com/tvh/ekg-wai/actions/workflows/ci.yml)
 
 This library lets you remotely monitor a running process over HTTP.
 It provides a simple way to integrate a monitoring server into any
