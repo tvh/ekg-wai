@@ -55,5 +55,5 @@ Master [git repository](https://github.com/tvh/ekg-wai):
 
 # Authors
 
-This library is maintained by Timo von Holtz, <tvh@tvholtz.de>.
+This library is maintained by Timo von Holtz, <tvh@tvholtz.net>.
 It was originally written using Snap by Johan Tibell, <johan.tibell@gmail.com>.

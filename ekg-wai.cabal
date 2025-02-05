@@ -12,7 +12,7 @@ bug-reports:         https://github.com/tvh/ekg-wai/issues
 license:             BSD3
 license-file:        LICENSE
 author:              Timo von Holtz, Johan Tibell
-maintainer:          tvh@tvholtz.de
+maintainer:          tvh@tvholtz.net
 category:            System, Network
 build-type:          Simple
 data-files:          assets/index.html assets/monitor.js assets/monitor.css
