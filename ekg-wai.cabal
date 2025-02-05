@@ -1,5 +1,5 @@
 name:                ekg-wai
-version:             0.1.1.0
+version:             0.1.2.0
 synopsis:            Remote monitoring of processes
 description:
   This library lets you remotely monitor a running process over HTTP.
@@ -29,6 +29,7 @@ tested-with:         GHC == 7.10.3
                    , GHC == 8.2.2
                    , GHC == 8.4.1
                    , GHC == 8.8.3
+                   , GHC == 9.6.5
 
 library
   exposed-modules:

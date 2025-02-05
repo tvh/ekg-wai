@@ -45,6 +45,7 @@ module System.Remote.Monitoring.Wai
     ) where
 
 import Control.Concurrent (ThreadId, myThreadId, throwTo)
+import Control.Exception (AsyncException(ThreadKilled), fromException)
 import Data.Int (Int64)
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Prelude hiding (read)
@@ -234,8 +235,10 @@ forkServerWith store host port = do
       startServer store host port
      ) $ \ r ->
         case r of
-            Left e  -> throwTo me e
             Right _ -> return ()
+            Left e  -> case fromException e of
+                Just ThreadKilled -> return ()
+                _                 -> throwTo me e
     return $! Server tid store
   where
     getTimeMs :: IO Int64
