@@ -18,17 +18,11 @@ jobs:
       matrix:
         versions:
           - ghc: '9.0.2'
-            cabal: '3.6'
           - ghc: '9.2.8'
-            cabal: '3.6'
           - ghc: '9.4.8'
-            cabal: '3.6'
           - ghc: '9.6.6'
-            cabal: '3.6'
           - ghc: '9.8.4'
-            cabal: '3.6'
           - ghc: '9.10.1'
-            cabal: '3.6'
 
     steps:
     - uses: actions/checkout@v2
@@ -36,10 +30,9 @@ jobs:
     # need to install older cabal/ghc versions from ppa repository
 
     - name: Install recent cabal/ghc
-      uses: haskell/actions/setup@v1
+      uses: haskell-actions/setup@v2
       with:
         ghc-version: ${{ matrix.versions.ghc }}
-        cabal-version: ${{ matrix.versions.cabal }}
 
     # declare/restore cached things
     # caching doesn't work for scheduled runs yet
