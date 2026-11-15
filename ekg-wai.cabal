@@ -49,7 +49,7 @@ library
     http-types,
     network,
     text,
-    time < 1.15,
+    time < 1.16,
     transformers,
     unordered-containers,
     wai,
